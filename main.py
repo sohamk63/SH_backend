@@ -17,7 +17,7 @@ app.add_middleware(
 # Load from Railway environment variables
 API_BASE_URL = os.getenv("API_BASE_URL")
 API_KEY = os.getenv("API_KEY")
-CLIENT_ID = int(os.getenv("CLIENT_ID"))  # Default 100 if not set
+CLIENT_ID = int(os.getenv("CLIENT_ID", 100))  # Default 100 if not set
 
 def get_domains(client_id):
     url = f"{API_BASE_URL}/domains/{client_id}?api_key={API_KEY}"
