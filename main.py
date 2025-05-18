@@ -1,23 +1,23 @@
+import os
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
 import requests
 from fastapi.middleware.cors import CORSMiddleware
 
-
-
 app = FastAPI()
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # or ["http://localhost:3000"]
+    allow_origins=["*"],  # Replace with specific domains in production
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-API_BASE_URL = "https://api.recruitment.shq.nz"
-API_KEY = "h523hDtETbkJ3nSJL323hjYLXbCyDaRZ"
-CLIENT_ID = 100
-
+# Load from Railway environment variables
+API_BASE_URL = os.getenv("API_BASE_URL")
+API_KEY = os.getenv("API_KEY")
+CLIENT_ID = int(os.getenv("CLIENT_ID"))  # Default 100 if not set
 
 def get_domains(client_id):
     url = f"{API_BASE_URL}/domains/{client_id}?api_key={API_KEY}"
@@ -25,13 +25,11 @@ def get_domains(client_id):
     response.raise_for_status()
     return response.json()
 
-
 def get_dns_records(zone_id):
     url = f"{API_BASE_URL}/zones/{zone_id}?api_key={API_KEY}"
     response = requests.get(url)
     response.raise_for_status()
     return response.json()
-
 
 @app.get("/dns-data")
 def dns_data():
@@ -57,3 +55,8 @@ def dns_data():
         output.append(domain_info)
 
     return JSONResponse(content=output)
+
+# Add Uvicorn server startup if running directly
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run("main:app", host="0.0.0.0", port=int(os.getenv("PORT", 8000)))
